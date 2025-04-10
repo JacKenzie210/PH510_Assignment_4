@@ -1,6 +1,6 @@
 # Licenced with Monzilla Public Licence 2.0
 """
-Gaussian Over-Relaxiation Method
+Successive Over-Relaxiation Method
 """
 
 import numpy as np
