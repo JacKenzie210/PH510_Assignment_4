@@ -21,10 +21,29 @@ class OverRelaxation:
         
         self.grid[1:-1, 1:-1] = x0
         
+        # test = self.grid[0, 1:-1]
+
+        # print(test)
+        # print(np.shape(test))
     def solve(self):
         
-        phi = 1/4* (1) 
+        phi = self.grid
+        convergance_tolerence = 1
+        while convergance_tolerence >= 0.1:
+            print('sadkjonf')
+            
+            for xi in range(len(self.grid[0, 1:-1])):
+                for yj in range(len(self.grid[0, 1:-1])):
+                    
+                
+                    phi[xi,yj] = 1/4* (phi[xi,yj-1]+ phi[xi,yj-1]+ phi[xi-1,yj] + phi[xi+1,yj]) 
+            
+            
 
+            convergance_tolerence -=0.1
+
+    def plot3d(self):
+        return
 
 ###############################################################################
 # Initial Conditions 
@@ -40,3 +59,6 @@ x0 = 0
 ###############################################################################
 
 a = OverRelaxation(shape, h, x0)
+
+
+b = a.solve()
