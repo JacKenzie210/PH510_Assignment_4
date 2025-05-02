@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 class OverRelaxation:
     
-    def __init__(self,grid_shape, spacing, x0):
+    def __init__(self,grid_shape, spacing, x0, boundary_values):
         
 
         self.h = spacing
@@ -39,4 +39,4 @@ x0 = 0
 # Testing
 ###############################################################################
 
-a = OverRelaxation(shape, h, x0)
+a = OverRelaxation(shape, h, x0, boundary_values)
