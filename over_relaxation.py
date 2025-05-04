@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 class OverRelaxation:
     
-    def __init__(self,grid_size, spacing, x0, boundary_values):
+    def __init__(self,grid_size, spacing, x0, boundary_values, func):
 
         """
         
@@ -23,6 +23,8 @@ class OverRelaxation:
              for poission equation.
         
         boundary_values : the boundary values 
+        
+        func: the function f(x,y). 
 
         Returns
         -------
@@ -37,71 +39,82 @@ class OverRelaxation:
         
         self.grid = np.empty( self.grid_shape )
         
-        self.grid[1:-1,:] = boundary_values
-        self.grid[:,1:-1] = boundary_values
-        
+        self.grid[:] = boundary_values
         self.grid[1:-1, 1:-1] = x0
         
-        #fixing grid corners having numbers like 1e-300
-        self.grid[0,0] =0
-        self.grid[-1,-1] =0
-        self.grid[-1,0] =0
-        self.grid[0,-1] =0
+        np.where(self.grid ==0, 1e-10, self.grid) # prevents potential divide
+                                                  # by 0 error
+        
+        self.func = func
 
 
-    def solve(self, func):
+
+    def solve(self, convergance_tolerence):
         
-        phi = self.grid.copy()
-        
-        convergance_tolerence = 1
+        self.phi = self.grid.copy()
+
+
         omega = 2/(1+np.sin(np.pi/self.N))
+        
+        convergance_change = convergance_tolerence + 1
 
-        while convergance_tolerence >= 0.1:
-            old_phi = phi.copy()
-            print('sadkjonf')
+        while convergance_change > convergance_tolerence:
+            old_phi = self.phi.copy()
 
-            for xi in range(1, len(self.grid[:,-1])-1):
+            for xi in range(1, self.N-1):
                 
                 for yj in range(1, len(self.grid[:-1, -1]-1)):
-                    print(xi)
-                    print(yj)
                 
-                    phi[xi,yj] = omega*( func(xi,yj) + 1/4* (phi[xi,yj-1]+ phi[xi,yj-1]+ phi[xi-1,yj] + phi[xi+1,yj]) ) + (1-omega)*old_phi[xi,yj]
+                    self.phi[xi,yj] = omega*( self.func(xi,yj) + 1/4* (
+                        self.phi[xi,yj-1]+ self.phi[xi,yj+1]+ self.phi[xi-1,yj]
+                        + self.phi[xi+1,yj]) ) + ((1-omega)*old_phi[xi,yj])
             
+            
+            self.test = np.abs( (old_phi - self.phi)/old_phi )
+            convergance_change = np.max( np.abs( (old_phi - self.phi)/old_phi ) )
 
+            print( np.max(old_phi), np.max(self.phi), convergance_change)
 
-            convergance_tolerence -=0.1
-    
-        return phi
+        return self.phi
 
     def plot3d(self):
-        ax = plt.axes(projection = "3d")
-        ax.scatter(3,5,7)
-        plt.show()
+        x = np.linspace(0, self.N * self.h, self.N)
+        y = np.linspace(0, self.N * self.h, self.N)
+        X, Y = np.meshgrid(x, y)
         
+        ax = plt.axes(projection = "3d")
+        ax.plot_surface(X, Y, self.phi, cmap="coolwarm")
+        plt.title(r"surface of $\phi$")
+        plt.xlabel("x value")
+        plt.ylabel("y value")
+        ax.set_zlabel(r"$\phi$(x,y)")
+        plt.show()
+
         return
 
 ###############################################################################
 # Initial Conditions 
 ###############################################################################
 
-boundary_values = 3
+boundary_values = 1
 grid_size = 100
 h = 1
 x0 = 50
 
+epsilon = 1e-3
+
 ###############################################################################
 # Testing
 ###############################################################################
-
-
-a = OverRelaxation(grid_size, h, x0, boundary_values)
-
 def test_func(x,y):
-    return np.sin(x)+np.sin(y)
+    return 0#y**2+ x**2
 
-b = a.solve(test_func)
-print(b[1,1])
+a = OverRelaxation(grid_size, h, x0, boundary_values, test_func)
 
-c = a.plot3d()
+
+
+b = a.solve( epsilon)
+
+
+a.plot3d()
 
