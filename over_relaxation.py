@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 class OverRelaxation:
     
-    def __init__(self,grid_size, spacing, x0, boundary_values, func):
+    def __init__(self,grid_size, spacing, x0, boundary_values, convergance_tolerence, func, ):
 
         """
         
@@ -47,18 +47,18 @@ class OverRelaxation:
         
         self.func = func
 
+        self.conv_tolerence = convergance_tolerence
 
-
-    def solve(self, convergance_tolerence):
+    def solve(self):
         
         self.phi = self.grid.copy()
-
+        
 
         omega = 2/(1+np.sin(np.pi/self.N))
         
-        convergance_change = convergance_tolerence + 1
+        convergance_change = self.conv_tolerence + 1
 
-        while convergance_change > convergance_tolerence:
+        while convergance_change > self.conv_tolerence:
             old_phi = self.phi.copy()
 
             for xi in range(1, self.N-1):
@@ -73,11 +73,17 @@ class OverRelaxation:
             self.test = np.abs( (old_phi - self.phi)/old_phi )
             convergance_change = np.max( np.abs( (old_phi - self.phi)/old_phi ) )
 
-            print( np.max(old_phi), np.max(self.phi), convergance_change)
+            print(f'''-----------------------------------------------------------
+                  \nOld {np.max(old_phi)}, New {np.max(self.phi)}''',
+                  f'\nConvergance = {convergance_change}')
 
         return self.phi
 
     def plot3d(self):
+        
+        if not hasattr(self, 'self.phi'):
+            self.solve()
+            
         x = np.linspace(0, self.N * self.h, self.N)
         y = np.linspace(0, self.N * self.h, self.N)
         X, Y = np.meshgrid(x, y)
@@ -96,10 +102,10 @@ class OverRelaxation:
 # Initial Conditions 
 ###############################################################################
 
-boundary_values = 1
+boundary_values = 5
 grid_size = 100
 h = 1
-x0 = 50
+x0 = 3
 
 epsilon = 1e-3
 
@@ -107,13 +113,14 @@ epsilon = 1e-3
 # Testing
 ###############################################################################
 def test_func(x,y):
-    return 0#y**2+ x**2
-
-a = OverRelaxation(grid_size, h, x0, boundary_values, test_func)
+    return np.sin(x+y)**2
 
 
+a = OverRelaxation(grid_size, h, x0, boundary_values,epsilon,  test_func)
 
-b = a.solve( epsilon)
+
+
+#b = a.solve()
 
 
 a.plot3d()
