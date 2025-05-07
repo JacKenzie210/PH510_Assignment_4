@@ -15,7 +15,7 @@ class OverRelaxation:
         
         Parameters
         ----------
-        grid_shape : The size of N to create a NxN grid
+        grid_size : The size of N to create a NxN grid
                      
         spacing : the grid spacing h 
         
@@ -31,12 +31,11 @@ class OverRelaxation:
         None.
 
         """
-        self.N = grid_size
         
-        self.grid_shape = (self.N,self.N)
-
         self.h = spacing
-        
+        self.N = int(grid_size // h)
+        self.grid_shape = (self.N, self.N)
+
         self.grid = np.empty( self.grid_shape )
         
         self.grid[:] = boundary_values
@@ -65,7 +64,7 @@ class OverRelaxation:
                 
                 for yj in range(1, len(self.grid[:-1, -1]-1)):
                 
-                    self.phi[xi,yj] = omega*( self.func(xi,yj) + 1/4* (
+                    self.phi[xi,yj] = omega*((h**2 * self.func(xi,yj)) + 1/4* (
                         self.phi[xi,yj-1]+ self.phi[xi,yj+1]+ self.phi[xi-1,yj]
                         + self.phi[xi+1,yj]) ) + ((1-omega)*old_phi[xi,yj])
             
@@ -84,8 +83,8 @@ class OverRelaxation:
         if not hasattr(self, 'self.phi'):
             self.solve()
             
-        x = np.linspace(0, self.N * self.h, self.N)
-        y = np.linspace(0, self.N * self.h, self.N)
+        x = np.linspace(0, self.N , self.N)
+        y = np.linspace(0, self.N , self.N)
         X, Y = np.meshgrid(x, y)
         
         ax = plt.axes(projection = "3d")
@@ -102,12 +101,13 @@ class OverRelaxation:
 # Initial Conditions 
 ###############################################################################
 
-boundary_values = 5
+
 grid_size = 100
-h = 1
+boundary_values = 5
+h = 1/2
 x0 = 3
 
-epsilon = 1e-3
+epsilon = 1e-2
 
 ###############################################################################
 # Testing
@@ -120,7 +120,7 @@ a = OverRelaxation(grid_size, h, x0, boundary_values,epsilon,  test_func)
 
 
 
-#b = a.solve()
+b = a.solve()
 
 
 a.plot3d()
