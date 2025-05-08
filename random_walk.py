@@ -96,7 +96,7 @@ class RandomWalk:
             
             while not ( xi ==0 or xi ==len(greens_grid)-1 or yj == 0 or yj ==len(greens_grid)-1):
                 
-                direction = np.random.randint(0,101)
+                direction = np.random.randint(0,100)
                 
                 if 0 <= direction <= up-1 :
                     xi -= 1 
@@ -118,24 +118,29 @@ class RandomWalk:
         sum_of_hits = np.sum(greens_grid)
 
         if sum_of_hits == n_walks:
-            print(f'All {n_walks} walks accounted for')
+            print(f'All {n_walks} walks accounted for and normalised')
          
         #Turning greens_grid from hits into probabilities
         greens_grid = greens_grid/n_walks
         
         return greens_grid
+
+
+    def solve(self,initial_position = None, n_walks = None, direction_probs = None):
         
+        self.random_walker(initial_position,n_walks,direction_probs)
         
+            
         
-#    def solve(self):
-        
-                                                  
+        return
+
+
 ###############################################################################
 # Initial Conditions 
 ###############################################################################
 
 boundary_values = 5
-grid_size = 10
+grid_size = 100
 h = 1
 x0 = 3
 
@@ -143,7 +148,7 @@ epsilon = 1e-3
 
 test_func = 1
 
-ipos = (4,4)
+ipos = (grid_size // 2, grid_size//2)
 n_walks = 10000
 
 prob_walks = np.array([0.25,0.25,0.25,0.25])
