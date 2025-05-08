@@ -41,7 +41,7 @@ class OverRelaxation:
         self.grid[:] = boundary_values
         self.grid[1:-1, 1:-1] = x0
         
-        np.where(self.grid ==0, 1e-10, self.grid) # prevents potential divide
+        np.where(self.grid ==0, 1e-10*convergance_tolerence, self.grid) # prevents potential divide
                                                   # by 0 error
         
         self.func = func
@@ -61,14 +61,14 @@ class OverRelaxation:
             old_phi = self.phi.copy()
 
             for xi in range(1, self.N-1):
-                
+
                 for yj in range(1, len(self.grid[:-1, -1]-1)):
-                
+
                     self.phi[xi,yj] = omega*((h**2 * self.func(xi,yj)) + 1/4* (
                         self.phi[xi,yj-1]+ self.phi[xi,yj+1]+ self.phi[xi-1,yj]
                         + self.phi[xi+1,yj]) ) + ((1-omega)*old_phi[xi,yj])
-            
-            
+
+
             self.test = np.abs( (old_phi - self.phi)/old_phi )
             convergance_change = np.max( np.abs( (old_phi - self.phi)/old_phi ) )
 
@@ -102,7 +102,7 @@ class OverRelaxation:
 ###############################################################################
 
 
-grid_size = 100
+grid_size = 10
 boundary_values = 5
 h = 1/2
 x0 = 3
