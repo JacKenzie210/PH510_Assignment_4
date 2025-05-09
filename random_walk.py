@@ -127,12 +127,12 @@ class RandomWalk:
 
 
     def solve(self,initial_position = None, n_walks = None, direction_probs = None):
+
+        g_grid = self.random_walker(initial_position,n_walks,direction_probs)
+        phi_grid = self.grid.copy()
+        phi_ij = np.sum (g_grid*phi_grid)
         
-        self.random_walker(initial_position,n_walks,direction_probs)
-        
-            
-        
-        return
+        return phi_ij
 
 
 ###############################################################################
@@ -140,7 +140,7 @@ class RandomWalk:
 ###############################################################################
 
 boundary_values = 5
-grid_size = 100
+grid_size = 10
 h = 1
 x0 = 3
 
@@ -149,12 +149,16 @@ epsilon = 1e-3
 test_func = 1
 
 ipos = (grid_size // 2, grid_size//2)
-n_walks = 10000
+n_walks = 100
 
 prob_walks = np.array([0.25,0.25,0.25,0.25])
 ###############################################################################
 # Testing
-###############################################################################                               
-a = RandomWalk(grid_size, h, x0, boundary_values,epsilon,  test_func)
-
-b = a.random_walker(ipos, n_walks, prob_walks )
+###############################################################################  
+if __name__ == "__main__":
+                                 
+    test = RandomWalk(grid_size, h, x0, boundary_values,epsilon,  test_func)
+    
+    test_green = test.random_walker(ipos, n_walks, prob_walks )
+    
+    test_solve = test.solve(ipos, n_walks, prob_walks)
