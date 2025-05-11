@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 class RandomWalk:
     
-    def __init__(self,grid_size, spacing, x0, boundary_values, convergance_tolerence, func, ):
+    def __init__(self, grid_size, spacing, x0, boundary_values, convergance_tolerence, func, ):
 
         """
         
@@ -35,9 +35,9 @@ class RandomWalk:
         self.N = int(grid_size // h)
         self.grid_shape = (self.N, self.N)
 
-        self.grid = np.empty( self.grid_shape )
+        self.grid = np.ones( self.grid_shape ) * boundary_values
         
-        self.grid[:] = boundary_values
+
         self.grid[1:-1, 1:-1] = x0
         
         np.where(self.grid ==0, 1e-10*convergance_tolerence, self.grid) # prevents potential divide
@@ -46,6 +46,18 @@ class RandomWalk:
         self.func = func
 
         self.conv_tolerence = convergance_tolerence
+
+    def std_greens(self, grid):
+        up_bound = grid[0, 1:-1]
+        low_bound = grid[-1, 1:-1]
+        left_bound = grid[1:-1, 0]
+        right_bound =  grid[1:-1,-1]
+        
+        total_bounds = np.concatenate([up_bound,low_bound,left_bound,right_bound])         
+        
+        std = np.std(total_bounds)
+                
+        return std
                                                   
     def random_walker(self,initial_position = None, n_walks = None, direction_probs = None):
         """
@@ -80,8 +92,9 @@ class RandomWalk:
                                        0.25,
                                        0.25])
         elif np.sum(direction_probs) != 1:
-            raise ValueError("ensure sum of probabilities = 1")
+            raise ValueError("ensure sum of probabilities = 1 (decimal probs)")
         
+        #converts from decimal to percentage
         up = direction_probs[0] * 100
         down = direction_probs[1] * 100
         left = direction_probs[2] * 100
@@ -123,16 +136,26 @@ class RandomWalk:
         #Turning greens_grid from hits into probabilities
         greens_grid = greens_grid/n_walks
         
-        return greens_grid
+        std_greens_grid = self.std_greens(greens_grid)
+        
+        return greens_grid, std_greens_grid
 
 
     def solve(self,initial_position = None, n_walks = None, direction_probs = None):
-
-        g_grid = self.random_walker(initial_position,n_walks,direction_probs)
-        phi_grid = self.grid.copy()
-        phi_ij = np.sum (g_grid*phi_grid)
         
-        return phi_ij
+        
+        if np.sum(self.grid[1:-1, 1:-1]) == 0: # Automatically selects the Laplace 
+                                       # solution if all grid points = 0 
+            g_grid = self.random_walker(initial_position,n_walks,direction_probs)
+            phi_grid = self.grid.copy()
+            phi_ij = np.sum (g_grid[0]*phi_grid)
+            std_phi = g_grid[1]
+            
+        else: #Will describe the solution to the Poission equation (i.e x0!= 0)
+            return
+
+        
+        return phi_ij, std_phi
 
 
 ###############################################################################
@@ -142,7 +165,7 @@ class RandomWalk:
 boundary_values = 5
 grid_size = 10
 h = 1
-x0 = 3
+x0 = 0
 
 epsilon = 1e-3
 
