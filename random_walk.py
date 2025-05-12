@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 
 class RandomWalk:
     
-    def __init__(self, grid_size, spacing, x0, boundary_values, convergance_tolerence, func, ):
+    def __init__(self, grid_size, spacing, x0, boundary_values):
 
         """
         
         Parameters
         ----------
-        grid_size : The size of N to create a NxN grid
+        grid_size : The length of the NxN grid
                      
         spacing : the grid spacing h 
         
@@ -32,20 +32,29 @@ class RandomWalk:
 
         """
         self.h = spacing
-        self.N = int(grid_size // h)
+        self.N = int(grid_size // self.h) # determines total size with respect to 
+                                     # spacing
         self.grid_shape = (self.N, self.N)
 
-        self.grid = np.ones( self.grid_shape ) * boundary_values
+        self.grid = np.ones( self.grid_shape ) 
+        
+        if  np.size(boundary_values) >1:
+            print('boundary == ',len(boundary_values))
+            print('grid ==', len(self.grid[0]))
+
+            self.grid[0] = boundary_values
+            self.grid[:,0] = boundary_values
+            self.grid[-1] = boundary_values
+            self.grid[:,-1] = boundary_values
+            
+        else:
+            self.grid*boundary_values
         
 
         self.grid[1:-1, 1:-1] = x0
         
-        np.where(self.grid ==0, 1e-10*convergance_tolerence, self.grid) # prevents potential divide
+        np.where(self.grid ==0, 1e-12, self.grid) # prevents potential divide
                                                   # by 0 error
-        
-        self.func = func
-
-        self.conv_tolerence = convergance_tolerence
 
     def std_greens(self, grid):
         up_bound = grid[0, 1:-1]
@@ -101,7 +110,7 @@ class RandomWalk:
         right = direction_probs[3] * 100
         
 
-        
+
         for i in range(n_walks):
             
             xi = initial_position[0]
@@ -113,17 +122,17 @@ class RandomWalk:
                 
                 if 0 <= direction <= up-1 :
                     xi -= 1 
-                    print(f'({xi},{yj}) U')
+                    #print(f'({xi},{yj}) U')
                 elif up <= direction <= up+down-1:
                     xi +=1
-                    print(f'({xi},{yj}) D')
+                    #print(f'({xi},{yj}) D')
                     
                 elif up + down <= direction <= up+down+left-1:
                     yj -= 1
-                    print(f'({xi},{yj}) L')
+                    #print(f'({xi},{yj}) L')
                 elif up+down+left <= direction <= up+down+left+right-1:
                     yj +=1
-                    print(f'({xi},{yj}) R')
+                    #print(f'({xi},{yj}) R')
   
             greens_grid[xi,yj]+=1
             print(f'({xi},{yj})')
@@ -137,7 +146,7 @@ class RandomWalk:
         greens_grid = greens_grid/n_walks
         
         std_greens_grid = self.std_greens(greens_grid)
-        
+
         return greens_grid, std_greens_grid
 
 
@@ -180,8 +189,34 @@ prob_walks = np.array([0.25,0.25,0.25,0.25])
 ###############################################################################  
 if __name__ == "__main__":
                                  
-    test = RandomWalk(grid_size, h, x0, boundary_values,epsilon,  test_func)
+    test = RandomWalk(grid_size, h, x0, boundary_values)
     
     test_green = test.random_walker(ipos, n_walks, prob_walks )
     
     test_solve = test.solve(ipos, n_walks, prob_walks)
+
+
+###############################################################################
+# Task 3
+# ###############################################################################
+# grid_size_t3 = 10e-2 #m
+# h_t3 = 1e-4 # m or 1e-2 cm 
+# x0_t3 = 0 #using Lapace as this task only considers Green functions.
+# boundary_t3 = np.linspace(0, grid_size_t3, int(grid_size_t3//h_t3))
+# n_walks_t3 = 10
+# point_a = (5e-2,5e-2) #m
+# point_b = (2.5e-2,2.5e-2) #m
+# point_c = (0.1e-2, 2.5e-2) #m
+# point_d = (0.1e-2, 0.1e-2) #m
+
+# points = np.array([point_a,point_b,point_c,point_d])
+# task_3 = np.zeros(len(points))
+# for i in range(len(points)):
+    
+#     task_3 = RandomWalk(grid_size_t3,h_t3,x0_t3,boundary_t3)
+#     greens_t3 = task_3.random_walker(points[i], n_walks_t3)
+#     greens_t3_sol = greens_t3[0]
+#     std_t3 = greens_t3[1]
+#     print(f'Task 3\n-------\ngreens_function of point {i} = {greens_t3}')
+
+

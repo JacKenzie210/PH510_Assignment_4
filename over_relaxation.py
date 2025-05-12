@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 
 class OverRelaxation:
     
-    def __init__(self,grid_size, spacing, x0, boundary_values, convergance_tolerence, func, ):
+    def __init__(self,grid_size, spacing, x0, boundary_values, convergance_tolerence, func):
 
         """
-        
+
         Parameters
         ----------
         grid_size : The size of N to create a NxN grid
@@ -28,6 +28,7 @@ class OverRelaxation:
 
         Returns
         -------
+
         None.
 
         """
