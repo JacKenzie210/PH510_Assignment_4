@@ -108,43 +108,90 @@ class RandomWalk:
         down = direction_probs[1] * 100
         left = direction_probs[2] * 100
         right = direction_probs[3] * 100
-        
 
 
-        for i in range(n_walks):
-            
-            xi = initial_position[0]
-            yj = initial_position[1]      
-            
-            while not ( xi ==0 or xi ==len(greens_grid)-1 or yj == 0 or yj ==len(greens_grid)-1):
+        if x0 == 0 : # less computationally demanding to record only the 
+                     # boundary values of the walk when considering Laplace.
                 
-                direction = np.random.randint(0,100)
+            for i in range(n_walks):
+    
+                xi = initial_position[0]
+                yj = initial_position[1]      
+    
+                while not ( xi ==0 or xi ==len(greens_grid)-1 or yj == 0 or yj ==len(greens_grid)-1):
+    
+                    direction = np.random.randint(0,100)
+    
+                    if 0 <= direction <= up-1 :
+                        xi -= 1
+                        #print(f'({xi},{yj}) U')
+                    elif up <= direction <= up+down-1:
+                        xi +=1
+                        #print(f'({xi},{yj}) D')
+                        
+                    elif up + down <= direction <= up+down+left-1:
+                        yj -= 1
+                        #print(f'({xi},{yj}) L')
+                    elif up+down+left <= direction <= up+down+left+right-1:
+                        yj +=1
+                        #print(f'({xi},{yj}) R')                
+      
+                greens_grid[xi,yj]+=1
+                print(f'({xi},{yj})')
                 
-                if 0 <= direction <= up-1 :
-                    xi -= 1 
-                    #print(f'({xi},{yj}) U')
-                elif up <= direction <= up+down-1:
-                    xi +=1
-                    #print(f'({xi},{yj}) D')
-                    
-                elif up + down <= direction <= up+down+left-1:
-                    yj -= 1
-                    #print(f'({xi},{yj}) L')
-                elif up+down+left <= direction <= up+down+left+right-1:
-                    yj +=1
-                    #print(f'({xi},{yj}) R')
-  
-            greens_grid[xi,yj]+=1
-            print(f'({xi},{yj})')
-        
-        sum_of_hits = np.sum(greens_grid)
+            sum_of_hits = np.sum(greens_grid)
+              
+            if sum_of_hits == n_walks:
+               print(f'All {n_walks} walks accounted for and normalised')
+                
+                
+        else: # counts every grid space for Poission equation where 
+              # charges != 0
+              n_steps = 0
+              for i in range(n_walks):
+      
+                  xi = initial_position[0]
+                  yj = initial_position[1]
+                  
+                  
+      
+                  while not ( xi ==0 or xi ==len(greens_grid)-1 or yj == 0 or yj ==len(greens_grid)-1):
+      
+                      direction = np.random.randint(0,100)
+      
+                      if 0 <= direction <= up-1 :
+                          xi -= 1
+                          greens_grid[xi,yj]+=1
+                          n_steps += 1
+                      elif up <= direction <= up+down-1:
+                          xi +=1
+                          greens_grid[xi,yj]+=1
+                          n_steps +=1
+                          
+                      elif up + down <= direction <= up+down+left-1:
+                          yj -= 1
+                          greens_grid[xi,yj]+=1
+                          n_steps +=1
 
-        if sum_of_hits == n_walks:
-            print(f'All {n_walks} walks accounted for and normalised')
+                      elif up+down+left <= direction <= up+down+left+right-1:
+                          yj +=1
+                          greens_grid[xi,yj]+=1  
+                          n_steps +=1
+
+                  greens_grid[xi,yj]+=1
+                  n_steps +=1
+                  
+                  print(f'({xi},{yj})')
+              
+        
+              sum_of_steps = np.sum(greens_grid)
+                
+              if sum_of_steps == n_steps:
+                 print(f'All {n_walks} walks accounted for and normalised')
          
         #Turning greens_grid from hits into probabilities
         greens_grid = greens_grid/n_walks
-        
+          
         std_greens_grid = self.std_greens(greens_grid)
 
         return greens_grid, std_greens_grid
@@ -174,7 +221,7 @@ class RandomWalk:
 boundary_values = 5
 grid_size = 10
 h = 1
-x0 = 0
+x0 = 1
 
 epsilon = 1e-3
 
@@ -194,6 +241,13 @@ if __name__ == "__main__":
     test_green = test.random_walker(ipos, n_walks, prob_walks )
     
     test_solve = test.solve(ipos, n_walks, prob_walks)
+
+
+
+
+
+
+
 
 
 ###############################################################################
