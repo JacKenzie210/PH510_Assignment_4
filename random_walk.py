@@ -12,11 +12,11 @@ class RandomWalk:
     def __init__(self, grid_size, spacing, x0, boundary_values):
 
         """
-        
+
         Parameters
         ----------
         grid_size : The length of the NxN grid
-                     
+
         spacing : the grid spacing h 
         
         x0 : Initial conditions of the solution eg. initial charge distribution
@@ -144,7 +144,8 @@ class RandomWalk:
             if sum_of_hits == n_walks:
                print(f'All {n_walks} walks accounted for and normalised')
                 
-                
+            #Turning greens_grid from hits into probabilities
+            greens_grid = greens_grid/n_walks 
         else: # counts every grid space for Poission equation where 
               # charges != 0
               n_steps = 0
@@ -152,9 +153,7 @@ class RandomWalk:
       
                   xi = initial_position[0]
                   yj = initial_position[1]
-                  
-                  
-      
+
                   while not ( xi ==0 or xi ==len(greens_grid)-1 or yj == 0 or yj ==len(greens_grid)-1):
       
                       direction = np.random.randint(0,100)
@@ -185,12 +184,12 @@ class RandomWalk:
               
         
               sum_of_steps = np.sum(greens_grid)
-                
+ 
               if sum_of_steps == n_steps:
-                 print(f'All {n_walks} walks accounted for and normalised')
+                 print(f'All {n_walks} walks accounted for and normalised, {sum_of_steps}, {n_steps}')
          
-        #Turning greens_grid from hits into probabilities
-        greens_grid = greens_grid/n_walks
+              #Turning greens_grid from total steps into probabilities
+              greens_grid = greens_grid/n_steps
           
         std_greens_grid = self.std_greens(greens_grid)
 
@@ -202,12 +201,22 @@ class RandomWalk:
         
         if x0 == 0: # Automatically selects the Laplace 
                     # solution if all grid points = 0 
-            g_grid = self.random_walker(initial_position,n_walks,direction_probs)
+            g_grid = self.random_walker(initial_position,n_walks,
+                                        direction_probs)
             phi_grid = self.grid.copy()
             self.phi_ij = np.sum (g_grid[0]*phi_grid)
             std_phi = g_grid[1]
 
         else: #Will describe the solution to the Poission equation (i.e x0!= 0)
+
+            g_grid = self.random_walker(initial_position,n_walks,
+                                        direction_probs)
+            
+            phi_grid = self.grid.copy()
+            self.phi_ij = np.sum(g_grid[0]*phi_grid) + (self.h**2/n_walks * 
+                                                        np.sum(g_grid[0]) )
+            std_phi = g_grid[1]        
+        
             return
 
 
@@ -240,7 +249,7 @@ class RandomWalk:
 boundary_values = 5
 grid_size = 10
 h = 1
-x0 = 0
+x0 = 1
 
 epsilon = 1e-3
 
