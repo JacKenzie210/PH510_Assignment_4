@@ -49,7 +49,7 @@ class RandomWalk:
             
         else:
             self.grid*boundary_values
-        
+
 
         self.grid[1:-1, 1:-1] = x0
         
@@ -200,18 +200,37 @@ class RandomWalk:
     def solve(self,initial_position = None, n_walks = None, direction_probs = None):
         
         
-        if np.sum(self.grid[1:-1, 1:-1]) == 0: # Automatically selects the Laplace 
-                                       # solution if all grid points = 0 
+        if x0 == 0: # Automatically selects the Laplace 
+                    # solution if all grid points = 0 
             g_grid = self.random_walker(initial_position,n_walks,direction_probs)
             phi_grid = self.grid.copy()
-            phi_ij = np.sum (g_grid[0]*phi_grid)
+            self.phi_ij = np.sum (g_grid[0]*phi_grid)
             std_phi = g_grid[1]
-            
+
         else: #Will describe the solution to the Poission equation (i.e x0!= 0)
             return
 
+
+        return self.phi_ij, std_phi
+    
+    def plot3d(self):
         
-        return phi_ij, std_phi
+        if not hasattr(self, 'self.phi_ij'): #runs the solve function to plot data
+            self.solve()                  # if not already done so
+
+        x = np.linspace(0, self.N , self.N)
+        y = np.linspace(0, self.N , self.N)
+        X, Y = np.meshgrid(x, y)
+
+        ax = plt.axes(projection = "3d")
+        ax.plot_surface(X, Y, self.phi, cmap="coolwarm")
+        plt.title(r"surface of $\phi$")
+        plt.xlabel("x value")
+        plt.ylabel("y value")
+        ax.set_zlabel(r"$\phi$(x,y)")
+        plt.show()
+
+        return
 
 
 ###############################################################################
@@ -221,7 +240,7 @@ class RandomWalk:
 boundary_values = 5
 grid_size = 10
 h = 1
-x0 = 1
+x0 = 0
 
 epsilon = 1e-3
 

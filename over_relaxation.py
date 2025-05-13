@@ -81,13 +81,13 @@ class OverRelaxation:
 
     def plot3d(self):
         
-        if not hasattr(self, 'self.phi'):
-            self.solve()
-            
+        if not hasattr(self, 'self.phi'): #runs the solve function to plot data
+            self.solve()                  # if not already done so
+
         x = np.linspace(0, self.N , self.N)
         y = np.linspace(0, self.N , self.N)
         X, Y = np.meshgrid(x, y)
-        
+
         ax = plt.axes(projection = "3d")
         ax.plot_surface(X, Y, self.phi, cmap="coolwarm")
         plt.title(r"surface of $\phi$")
