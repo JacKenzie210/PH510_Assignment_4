@@ -5,11 +5,12 @@ Random walker to solve the greens function of poission equation
 
 import numpy as np
 import matplotlib.pyplot as plt
+from monte_carlo import MonteCarlo
 
 
 class RandomWalk:
     
-    def __init__(self, grid_size, spacing, x0, boundary_values):
+    def __init__(self, grid_size, spacing, x0, boundary_values, func):
 
         """
 
@@ -32,11 +33,13 @@ class RandomWalk:
 
         """
         self.h = spacing
-        self.N = int(grid_size // self.h) # determines total size with respect to 
-                                     # spacing
+        self.N = int(grid_size // self.h) # determines total size with respect
+                                          # to spacing.
         self.grid_shape = (self.N, self.N)
 
         self.grid = np.ones( self.grid_shape ) 
+        self.func = func
+        self.bound = boundary_values
         
         if  np.size(boundary_values) >1:
             print('boundary == ',len(boundary_values))
@@ -46,7 +49,7 @@ class RandomWalk:
             self.grid[:,0] = boundary_values
             self.grid[-1] = boundary_values
             self.grid[:,-1] = boundary_values
-            
+
         else:
             self.grid*boundary_values
 
@@ -84,16 +87,16 @@ class RandomWalk:
         """
         #Greens grid is used to determine the probabilities 
         #(and thus greens function) of each boundary point bering hit
-        greens_grid = np.zeros( self.grid_shape )
+        self.greens_grid = np.zeros( self.grid_shape )
         
         if initial_position is None:
-            initial_position = (len(greens_grid)//2 , len(greens_grid)//2)
+            initial_position = (len(self.greens_grid)//2 , len(self.greens_grid)//2)
         
         if n_walks is None:
             #Defaulting number of walks to 100 if no imput is presented
             n_walks = 100
 
-        
+
         if direction_probs is None:
             #assigns equal probability of each direction occuring
             direction_probs = np.array([0.25,
@@ -102,7 +105,7 @@ class RandomWalk:
                                        0.25])
         elif np.sum(direction_probs) != 1:
             raise ValueError("ensure sum of probabilities = 1 (decimal probs)")
-        
+
         #converts from decimal to percentage
         up = direction_probs[0] * 100
         down = direction_probs[1] * 100
@@ -112,40 +115,42 @@ class RandomWalk:
 
         if x0 == 0 : # less computationally demanding to record only the 
                      # boundary values of the walk when considering Laplace.
-                
+
             for i in range(n_walks):
-    
+
                 xi = initial_position[0]
-                yj = initial_position[1]      
+                yj = initial_position[1]
     
-                while not ( xi ==0 or xi ==len(greens_grid)-1 or yj == 0 or yj ==len(greens_grid)-1):
+                while not ( xi ==0 or xi ==len(self.greens_grid)-1 or yj == 0 or yj ==len(self.greens_grid)-1):
     
                     direction = np.random.randint(0,100)
-    
+
                     if 0 <= direction <= up-1 :
                         xi -= 1
-                        #print(f'({xi},{yj}) U')
+                        print(f'({xi},{yj}) U')
                     elif up <= direction <= up+down-1:
                         xi +=1
-                        #print(f'({xi},{yj}) D')
-                        
+                        print(f'({xi},{yj}) D')
+
                     elif up + down <= direction <= up+down+left-1:
                         yj -= 1
-                        #print(f'({xi},{yj}) L')
+                        print(f'({xi},{yj}) L')
                     elif up+down+left <= direction <= up+down+left+right-1:
                         yj +=1
-                        #print(f'({xi},{yj}) R')                
-      
-                greens_grid[xi,yj]+=1
+                        print(f'({xi},{yj}) R')
+
+
+                self.greens_grid[xi,yj]+=1
                 print(f'({xi},{yj})')
-                
-            sum_of_hits = np.sum(greens_grid)
+
+            sum_of_hits = np.sum(self.greens_grid)
               
             if sum_of_hits == n_walks:
                print(f'All {n_walks} walks accounted for and normalised')
                 
-            #Turning greens_grid from hits into probabilities
-            greens_grid = greens_grid/n_walks 
+            #Turning self.greens_grid from hits into probabilities
+            self.greens_grid = self.greens_grid/n_walks
+
         else: # counts every grid space for Poission equation where 
               # charges != 0
               n_steps = 0
@@ -154,92 +159,140 @@ class RandomWalk:
                   xi = initial_position[0]
                   yj = initial_position[1]
 
-                  while not ( xi ==0 or xi ==len(greens_grid)-1 or yj == 0 or yj ==len(greens_grid)-1):
-      
-                      direction = np.random.randint(0,100)
+                  while not ( xi ==0 or xi ==len(self.greens_grid)-1 or yj == 0 or yj ==len(self.greens_grid)-1):
+
+                      direction = np.random.randint(0,3)
       
                       if 0 <= direction <= up-1 :
                           xi -= 1
-                          greens_grid[xi,yj]+=1
+                          self.greens_grid[xi,yj]+=1
                           n_steps += 1
+
                       elif up <= direction <= up+down-1:
                           xi +=1
-                          greens_grid[xi,yj]+=1
+                          self.greens_grid[xi,yj]+=1
                           n_steps +=1
                           
                       elif up + down <= direction <= up+down+left-1:
                           yj -= 1
-                          greens_grid[xi,yj]+=1
+                          self.greens_grid[xi,yj]+=1
                           n_steps +=1
 
                       elif up+down+left <= direction <= up+down+left+right-1:
                           yj +=1
-                          greens_grid[xi,yj]+=1  
+                          self.greens_grid[xi,yj]+=1  
                           n_steps +=1
 
-                  greens_grid[xi,yj]+=1
+                  self.greens_grid[xi,yj]+=1
                   n_steps +=1
-                  
+
                   print(f'({xi},{yj})')
-              
-        
-              sum_of_steps = np.sum(greens_grid)
+
+              sum_of_steps = np.sum(self.greens_grid)
  
               if sum_of_steps == n_steps:
-                 print(f'All {n_walks} walks accounted for and normalised, {sum_of_steps}, {n_steps}')
-         
-              #Turning greens_grid from total steps into probabilities
-              greens_grid = greens_grid/n_steps
-          
-        std_greens_grid = self.std_greens(greens_grid)
+                 print(f'All {n_steps} steps accounted for and normalised')
 
-        return greens_grid, std_greens_grid
+              #Turning self.greens_grid from total steps into probabilities
+              self.greens_grid = self.greens_grid/n_steps
+
+        std_greens_grid = self.std_greens(self.greens_grid)
+
+        return self.greens_grid, std_greens_grid
 
 
-    def solve(self,initial_position = None, n_walks = None, direction_probs = None):
+    # def solve(self,initial_position = None, n_walks = None, direction_probs = None):
+
+
+    #     #solves the Laplace (which Poisson depends on if solving that)
+    #     g_grid = self.random_walker(initial_position,n_walks,
+    #                                 direction_probs)
+    #     phi_grid = self.grid.copy()
+    #     self.phi_ij_Laplace = np.sum (g_grid[0]*phi_grid)
+    #     std_phi = g_grid[1]
+
+    #     if x0 !=0: #Will describe the solution to the Poission equation (i.e x0!= 0)
+
+    #         g_grid = self.random_walker(initial_position,n_walks,
+    #                                     direction_probs)
+
+    #         phi_grid = self.grid.copy()
+    #         self.phi_ij = np.sum(g_grid[0]*phi_grid) + (self.h**2/n_walks * 
+    #                                                     np.sum(g_grid[0]) )
+    #         std_phi = g_grid[1]        
+
+    #         return
+
+
+    #     return self.phi_ij, std_phi
+
+
+
+
+    def solve(self, initial_position = None, n_walks = None,
+              direction_probs = None):
+
+        if not hasattr(self, 'greens_grid'):#prevent recalculation 
+                                                 #if already conducted
+            self.greens_grid  = self.random_walker(initial_position, n_walks, 
+                                       direction_probs)[0]
+
+
+
+        grid_coords = self.grid_coords(self.greens_grid)
         
+        #implementing Monte Carlo
+        #monte = MonteCarlo(grid_coords, [1,self.bound]).integrate(self.func)
         
-        if x0 == 0: # Automatically selects the Laplace 
-                    # solution if all grid points = 0 
-            g_grid = self.random_walker(initial_position,n_walks,
-                                        direction_probs)
-            phi_grid = self.grid.copy()
-            self.phi_ij = np.sum (g_grid[0]*phi_grid)
-            std_phi = g_grid[1]
 
-        else: #Will describe the solution to the Poission equation (i.e x0!= 0)
 
-            g_grid = self.random_walker(initial_position,n_walks,
-                                        direction_probs)
-            
-            phi_grid = self.grid.copy()
-            self.phi_ij = np.sum(g_grid[0]*phi_grid) + (self.h**2/n_walks * 
-                                                        np.sum(g_grid[0]) )
-            std_phi = g_grid[1]        
+        integrand_green = np.mean(grid_coords)#self.greens_grid[grid_coords[0],grid_coords[1]]
+
+        solution = integrand_green*( 
+            MonteCarlo(grid_coords,[0,self.N*self.h]).integrate(self.func) )
+        return solution
+
+
+
+
+
+    def grid_coords(self, grid):
         
-            return
+        """
+        generation of a meshgrid to create arrays representing the co-ords
+        of the inputted grid. Allows for easy indexing for f(x,y) in the class.
+        """
 
+        #This generates the co-ordinates for the grid positions       
+        row, column = np.indices((self.N, self.N))
+        coords = np.vstack([row.ravel(), column.ravel()])
 
-        return self.phi_ij, std_phi
-    
-    def plot3d(self):
+        return coords*self.h
         
-        if not hasattr(self, 'self.phi_ij'): #runs the solve function to plot data
-            self.solve()                  # if not already done so
 
-        x = np.linspace(0, self.N , self.N)
-        y = np.linspace(0, self.N , self.N)
-        X, Y = np.meshgrid(x, y)
+    # def plot3d(self,initial_position = None,
+    #            n_walks = None,
+    #            direction_probs = None):
 
-        ax = plt.axes(projection = "3d")
-        ax.plot_surface(X, Y, self.phi, cmap="coolwarm")
-        plt.title(r"surface of $\phi$")
-        plt.xlabel("x value")
-        plt.ylabel("y value")
-        ax.set_zlabel(r"$\phi$(x,y)")
-        plt.show()
 
-        return
+    #     if not hasattr(self, 'self.phi_ij'): #runs the solve function to plot data
+    #         self.solve(initial_position,     # if not already done so
+    #                    n_walks, 
+    #                    direction_probs)     
+
+    #     x = np.linspace(0, self.N , self.N)
+    #     y = np.linspace(0, self.N , self.N)
+    #     X, Y = np.meshgrid(x, y)
+
+    #     ax = plt.axes(projection = "3d")
+    #     ax.plot_surface(X, Y, self.phi_ij, cmap="coolwarm")
+    #     plt.title(r"surface of $\phi$")
+    #     plt.xlabel("x value")
+    #     plt.ylabel("y value")
+    #     ax.set_zlabel(r"$\phi$(x,y)")
+    #     plt.show()
+
+    #     return
 
 
 ###############################################################################
@@ -249,13 +302,15 @@ class RandomWalk:
 boundary_values = 5
 grid_size = 10
 h = 1
-x0 = 1
+x0 = 0
 
 epsilon = 1e-3
 
-test_func = 1
+def test_func(coords):
+    return 1
 
-ipos = (grid_size // 2, grid_size//2)
+
+ipos = (grid_size // (h*2), grid_size//(h*2))
 n_walks = 100
 
 prob_walks = np.array([0.25,0.25,0.25,0.25])
@@ -264,11 +319,13 @@ prob_walks = np.array([0.25,0.25,0.25,0.25])
 ###############################################################################  
 if __name__ == "__main__":
                                  
-    test = RandomWalk(grid_size, h, x0, boundary_values)
+    test = RandomWalk(grid_size, h, x0, boundary_values, test_func)
     
     test_green = test.random_walker(ipos, n_walks, prob_walks )
     
     test_solve = test.solve(ipos, n_walks, prob_walks)
+    
+    test_grid_mc =test.grid_coords(test_green)
 
 
 
@@ -300,5 +357,3 @@ if __name__ == "__main__":
 #     greens_t3_sol = greens_t3[0]
 #     std_t3 = greens_t3[1]
 #     print(f'Task 3\n-------\ngreens_function of point {i} = {greens_t3}')
-
-
