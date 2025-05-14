@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from monte_carlo import MonteCarlo
 
 
-class RandomWalk:
+class GreensFunc:
     
     def __init__(self, grid_size, spacing, x0, boundary_values, func):
 
@@ -40,7 +40,7 @@ class RandomWalk:
         self.grid = np.ones( self.grid_shape ) 
         self.func = func
         self.bound = boundary_values
-        
+
         if  np.size(boundary_values) >1:
             print('boundary == ',len(boundary_values))
             print('grid ==', len(self.grid[0]))
@@ -55,7 +55,7 @@ class RandomWalk:
 
 
         self.grid[1:-1, 1:-1] = x0
-        
+
         np.where(self.grid ==0, 1e-12, self.grid) # prevents potential divide
                                                   # by 0 error
 
@@ -64,7 +64,7 @@ class RandomWalk:
         low_bound = grid[-1, 1:-1]
         left_bound = grid[1:-1, 0]
         right_bound =  grid[1:-1,-1]
-        
+
         total_bounds = np.concatenate([up_bound,low_bound,left_bound,right_bound])         
         
         std = np.std(total_bounds)
@@ -86,7 +86,8 @@ class RandomWalk:
                          up/down/left/right respectively
         """
         #Greens grid is used to determine the probabilities 
-        #(and thus greens function) of each boundary point bering hit
+        #(and thus greens function) of each boundary point being hit from the 
+        #initial point
         self.greens_grid = np.zeros( self.grid_shape )
         
         if initial_position is None:
@@ -118,26 +119,26 @@ class RandomWalk:
 
             for i in range(n_walks):
 
-                xi = initial_position[0]
-                yj = initial_position[1]
+                xi = int(initial_position[0])
+                yj = int(initial_position[1])
     
                 while not ( xi ==0 or xi ==len(self.greens_grid)-1 or yj == 0 or yj ==len(self.greens_grid)-1):
-    
+
                     direction = np.random.randint(0,100)
 
                     if 0 <= direction <= up-1 :
                         xi -= 1
-                        print(f'({xi},{yj}) U')
+                        #print(f'({xi},{yj}) U')
                     elif up <= direction <= up+down-1:
                         xi +=1
-                        print(f'({xi},{yj}) D')
+                        #print(f'({xi},{yj}) D')
 
                     elif up + down <= direction <= up+down+left-1:
                         yj -= 1
-                        print(f'({xi},{yj}) L')
-                    elif up+down+left <= direction <= up+down+left+right-1:
+                        #print(f'({xi},{yj}) L')
+                    else:
                         yj +=1
-                        print(f'({xi},{yj}) R')
+                        #print(f'({xi},{yj}) R')
 
 
                 self.greens_grid[xi,yj]+=1
@@ -196,9 +197,9 @@ class RandomWalk:
               #Turning self.greens_grid from total steps into probabilities
               self.greens_grid = self.greens_grid/n_steps
 
-        std_greens_grid = self.std_greens(self.greens_grid)
+        self.std_greens = self.std_greens(self.greens_grid)
 
-        return self.greens_grid, std_greens_grid
+        return self.greens_grid, self.std_greens
 
 
     # def solve(self,initial_position = None, n_walks = None, direction_probs = None):
@@ -234,23 +235,32 @@ class RandomWalk:
 
         if not hasattr(self, 'greens_grid'):#prevent recalculation 
                                                  #if already conducted
-            self.greens_grid  = self.random_walker(initial_position, n_walks, 
-                                       direction_probs)[0]
+            g_grid = self.random_walker(initial_position, n_walks, 
+                                       direction_probs) 
+            self.greens_grid  =g_grid[0]
+            std_greens = g_grid[1]
 
 
-
-        grid_coords = self.grid_coords(self.greens_grid)
+        self.phi_grid = self.grid.copy()
+        self.phi_ij = np.sum (self.greens_grid*self.phi_grid)
+        std_phi = self.std_greens       
         
-        #implementing Monte Carlo
-        #monte = MonteCarlo(grid_coords, [1,self.bound]).integrate(self.func)
+        if x0 != 0:
+            
         
-
-
-        integrand_green = np.mean(grid_coords)#self.greens_grid[grid_coords[0],grid_coords[1]]
-
-        solution = integrand_green*( 
-            MonteCarlo(grid_coords,[0,self.N*self.h]).integrate(self.func) )
-        return solution
+            grid_coords = self.grid_coords(self.greens_grid)
+            
+    
+            integrand_green = np.mean(grid_coords)
+            
+            #implementing Monte Carlo
+            rand_x = np.random.uniform(0, self.bound , size =self.N)
+            mc_arr = np.array([rand_x])
+            
+            self.phi_ij += integrand_green*(
+                MonteCarlo(mc_arr,[0,self.N*self.h]).integrate(self.func) )
+        
+        return self.phi_grid, self.phi_ij, std_phi
 
 
 
@@ -299,33 +309,33 @@ class RandomWalk:
 # Initial Conditions 
 ###############################################################################
 
-boundary_values = 5
+boundary_values = 1
 grid_size = 10
-h = 1
+h = 0.1
 x0 = 0
 
 epsilon = 1e-3
 
 def test_func(coords):
-    return 1
+    return np.sin(x+y)**2
 
 
-ipos = (grid_size // (h*2), grid_size//(h*2))
+ipos = (grid_size // (h), grid_size//(h))
 n_walks = 100
 
 prob_walks = np.array([0.25,0.25,0.25,0.25])
 ###############################################################################
 # Testing
 ###############################################################################  
-if __name__ == "__main__":
+# if __name__ == "__main__":
                                  
-    test = RandomWalk(grid_size, h, x0, boundary_values, test_func)
+#     test = GreensFunc(grid_size, h, x0, boundary_values, test_func)
     
-    test_green = test.random_walker(ipos, n_walks, prob_walks )
+#     test_green = test.random_walker(ipos, n_walks, prob_walks )
     
-    test_solve = test.solve(ipos, n_walks, prob_walks)
+#     test_solve = test.solve(ipos, n_walks, prob_walks)
     
-    test_grid_mc =test.grid_coords(test_green)
+#     test_grid_mc =test.grid_coords(test_green)
 
 
 
@@ -337,23 +347,49 @@ if __name__ == "__main__":
 
 ###############################################################################
 # Task 3
-# ###############################################################################
-# grid_size_t3 = 10e-2 #m
-# h_t3 = 1e-4 # m or 1e-2 cm 
-# x0_t3 = 0 #using Lapace as this task only considers Green functions.
-# boundary_t3 = np.linspace(0, grid_size_t3, int(grid_size_t3//h_t3))
-# n_walks_t3 = 10
-# point_a = (5e-2,5e-2) #m
-# point_b = (2.5e-2,2.5e-2) #m
-# point_c = (0.1e-2, 2.5e-2) #m
-# point_d = (0.1e-2, 0.1e-2) #m
+# #############################################################################
+if __name__ == "__main__":
+    grid_size_t3 = 10e-2 #m
+    h_t3 = 1e-3 # m  or 1e-1 cm
+    x0_t3 = 0 #using Lapace as this task only considers Green functions.
+    boundary_t3 = np.linspace(0, grid_size_t3, int(grid_size_t3//h_t3))
+    n_walks_t3 = 100
+    point_a = (5e-2//h_t3,5e-2//h_t3) #cm
+    point_b = (2.5e-2//h_t3,2.5e-2//h_t3) #cm
+    point_c = (0.1e-2//h_t3, 2.5e-2//h_t3) #cm
+    point_d = (0.1e-2//h_t3, 0.1e-2//h_t3) #cm
 
-# points = np.array([point_a,point_b,point_c,point_d])
-# task_3 = np.zeros(len(points))
-# for i in range(len(points)):
-    
-#     task_3 = RandomWalk(grid_size_t3,h_t3,x0_t3,boundary_t3)
-#     greens_t3 = task_3.random_walker(points[i], n_walks_t3)
-#     greens_t3_sol = greens_t3[0]
-#     std_t3 = greens_t3[1]
-#     print(f'Task 3\n-------\ngreens_function of point {i} = {greens_t3}')
+    points_t3 = np.array([point_a,point_b,point_c,point_d])
+    task_3_sol = np.zeros(len(points_t3))
+    task_3_std = np.zeros(len(points_t3))
+
+
+    for i in range(len(points_t3)):
+        initialise = GreensFunc(grid_size_t3,h_t3,x0_t3,boundary_t3, test_func)
+        task_3_greens = initialise.solve(points_t3[i], n_walks_t3)
+        
+        task_3_sol[i] = task_3_greens[1]
+        task_3_std[i]= task_3_greens[2]
+    print('\nTask 3\n-------\n')
+    for j in range(len(points_t3)):
+
+        print(f'''G_ij at {(points_t3[j]*h_t3)*1e2} cm = {task_3_sol[j]} +/- {task_3_std[j]}''')
+
+
+
+labels = ['A (5, 5)', 'B (2.5,2.5)', 'C (0.1, 2.5)', 'D (0.1,0.1)']
+
+# Plot Green's function values with error bars
+plt.figure(figsize=(8, 5))
+plt.bar(labels, task_3_sol, yerr=task_3_std, capsize=10)
+
+plt.ylabel("Green's Function Value")
+plt.xlabel("positions on the grid (cm)")
+plt.ylim(0)
+plt.title("Green's Function Task 3 Points in 10cm x 10cm Grid")
+plt.show()
+
+
+###############################################################################
+# Task 4
+# #############################################################################
