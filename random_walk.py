@@ -29,7 +29,8 @@ class GreensFunc:
         self.x_0 : Initial conditions of the solution eg. initial charge distribution
              for poission equation.
 
-        boundary_values : the boundary values
+        boundary_values : the boundary values. can be single value or size 4
+                          array corrosponding to upper, lower, left and right.
 
         func: the function f(x,y).
 
@@ -47,15 +48,20 @@ class GreensFunc:
         self.grid = np.ones( self.grid_shape )
         self.func = func
         self.bound = boundary_values
-        self.x_0 = x_0
-        if  np.size(boundary_values) >1:
-            print('boundary == ',len(boundary_values))
-            print('grid ==', len(self.grid[0]))
 
-            self.grid[0] = boundary_values
-            self.grid[:,0] = boundary_values
-            self.grid[-1] = boundary_values
-            self.grid[:,-1] = boundary_values
+        self.x_0 = x_0
+        if np.size(self.x_0) > 1 : #if a constant gradient array i.e task 4.bb
+            self.x_0 = self.grid[1:-1,1:-1]
+            for i in range(len(self.x_0[0])):
+                self.x_0[:,i] = x_0
+        else:
+            self.x_0 = x_0
+        if  np.size(boundary_values) == 4:
+
+            self.grid[0] = boundary_values[0]
+            self.grid[:,0] = boundary_values[1]
+            self.grid[-1] = boundary_values[2]
+            self.grid[:,-1] = boundary_values[3]
 
         else:
             self.grid*boundary_values
@@ -99,6 +105,7 @@ class GreensFunc:
         if initial_position is None:
             initial_position = (len(self.greens_grid)//2 , len(self.greens_grid)//2)
 
+        initial_position = initial_position // self.h_space
         if n_walks is None:
             #Defaulting number of walks to 100 if no imput is presented
             n_walks = 100
@@ -123,7 +130,7 @@ class GreensFunc:
         if self.x_0 == 0 : # less computationally demanding to record only the
                      # boundary values of the walk when considering Laplace.
 
-            for i in range(n_walks):
+            for _ in range(n_walks):
 
                 x_i = int(initial_position[0])
                 y_j = int(initial_position[1])
@@ -154,20 +161,20 @@ class GreensFunc:
             sum_of_hits = np.sum(self.greens_grid)
 
             if sum_of_hits == n_walks:
-               print(f'All {n_walks} walks accounted for and normalised')
+                print(f'All {n_walks} walks accounted for and normalised')
 
             #Turning self.greens_grid from hits into probabilities
             self.greens_grid = self.greens_grid/n_walks
 
         else: # counts every grid space for Poission equation where
               # charges != 0
-              n_steps = 0
-              for i in range(n_walks):
-                  x_i = int(initial_position[0])
-                  y_j = int(initial_position[1])
+            n_steps = 0
+            for i in range(n_walks):
+                x_i = int(initial_position[0])
+                y_j = int(initial_position[1])
 
-                  while not ( x_i ==0 or x_i ==len(self.greens_grid)-1
-                             or y_j == 0 or y_j ==len(self.greens_grid)-1):
+                while not ( x_i ==0 or x_i ==len(self.greens_grid)-1
+                           or y_j == 0 or y_j ==len(self.greens_grid)-1):
 
                     direction = np.random.randint(0,100)
 
@@ -193,51 +200,27 @@ class GreensFunc:
                         n_steps +=1
                         #print(f'({x_i},{y_j}) R')
 
-                  self.greens_grid[x_i,y_j]+=1
-                  n_steps +=1
+                self.greens_grid[x_i,y_j]+=1
+                n_steps +=1
 
-                  #print(f'({x_i},{y_j})')
+                #print(f'({x_i},{y_j})')
 
-              sum_of_steps = int(np.sum(self.greens_grid))
+            sum_of_steps = int(np.sum(self.greens_grid))
 
-              if sum_of_steps == n_steps:
-                 print(f'All {n_steps} steps accounted for and normalised')
-              else:
-                 print('not normalised')
+            if sum_of_steps == n_steps:
+                print(f'All {n_steps} steps accounted for and normalised')
+            else:
+                print('not normalised')
 
-              #Turning self.greens_grid from total steps into probabilities
-              self.greens_grid = self.greens_grid/n_steps
+            #Turning self.greens_grid from total steps into probabilities
+            self.greens_grid = self.greens_grid/n_steps
 
         self.std_greens_val = self.std_greens(self.greens_grid)
-
+        # self.greens_grid[0] /= self.h_space**2
+        # self.greens_grid[:,0] /= self.h_space**2
+        # self.greens_grid[-1]  /= self.h_space**2
+        # self.greens_grid[:,-1] /= self.h_space**2
         return self.greens_grid, self.std_greens_val
-
-
-    # def solve(self,initial_position = None, n_walks = None, direction_probs = None):
-
-
-    #     #solves the Laplace (which Poisson depends on if solving that)
-    #     g_grid = self.random_walker(initial_position,n_walks,
-    #                                 direction_probs)
-    #     phi_grid = self.grid.copy()
-    #     self.phi_ij_Laplace = np.sum (g_grid[0]*phi_grid)
-    #     std_phi = g_grid[1]
-
-    #     if self.x_0 !=0: #Will describe the solution to the Poission equation (i.e x0!= 0)
-
-    #         g_grid = self.random_walker(initial_position,n_walks,
-    #                                     direction_probs)
-
-    #         phi_grid = self.grid.copy()
-    #         self.phi_ij = np.sum(g_grid[0]*phi_grid) + (self.h_space**2/n_walks *
-    #                                                     np.sum(g_grid[0]) )
-    #         std_phi = g_grid[1]
-
-    #         return
-
-
-    #     return self.phi_ij, std_phi
-
 
 
 
@@ -258,16 +241,19 @@ class GreensFunc:
             std_phi = self.std_greens_val
 
         else:
+            x_0_copy = self.x_0
+            self.x_0 = 0 #aquires the Laplace Greens function portion
+            self.random_walker(initial_position,n_walks,direction_probs)
 
             self.phi_grid = self.grid.copy()
             self.phi_ij = np.sum (self.greens_grid*self.phi_grid)
             std_green = self.std_greens_val
 
 
-            grid_coords = self.grid_coords(self.greens_grid)
-
-
-            integrand_green = np.mean(grid_coords)
+            self.x_0 = x_0_copy #returns to origional value for G Poission.
+            self.random_walker(initial_position,n_walks,direction_probs)
+            #grid_coords = self.grid_coords(self.greens_grid)
+            integrand_green = np.mean(self.greens_grid)
 
             #implementing Monte Carlo
             rand_x = np.random.uniform(0, self.bound , size =self.n_grid_points)
@@ -277,7 +263,6 @@ class GreensFunc:
             self.phi_ij += integrand_green*monte_carlo_integral
 
             mc_stats = monte_carlo.mean_var_std(self.func)
-
 
             std_phi = np.sqrt(std_green**2 + mc_stats[1] )
 
@@ -370,36 +355,36 @@ if __name__ == "__main__":
 ###############################################################################
 if __name__ == "__main__":
     grid_size_t3 = 10e-2 #m
-    h_t3 = 1e-2 # m  or 1e-1 cm
+    h_t3 = 1e-3 # m  or 1e-1 cm
     x0_t3 = 1 #using poissons Green functions.
-    boundary_t3 = 0
+    boundary_t3 = 3
     n_walks_t3 = 100
-    point_a = (5e-2//h_t3,5e-2//h_t3) #cm
-    point_b = (2.5e-2//h_t3,2.5e-2//h_t3) #cm
-    point_c = (0.1e-2//h_t3, 2.5e-2//h_t3) #cm
-    point_d = (0.1e-2//h_t3, 0.1e-2//h_t3) #cm
+    point_a = (5e-2,5e-2) #cm
+    point_b = (2.5e-2,2.5e-2) #cm
+    point_c = (0.1e-2, 2.5e-2) #cm
+    point_d = (0.1e-2, 0.1e-2) #cm
 
     points_t3 = np.array([point_a,point_b,point_c,point_d])
     task_3_sol = np.zeros(len(points_t3))
-    task_3_std = np.zeros(len(points_t3))
+    t3_std = np.zeros(len(points_t3))
 
 
     for i in range(len(points_t3)):
         initialise = GreensFunc(grid_size_t3,h_t3,x0_t3,boundary_t3, test_func)
-        task_3_greens = initialise.solve(points_t3[i], n_walks_t3)
-        t_3_grid = initialise.random_walker(points_t3[i],n_walks_t3)[0]
-
-        task_3_sol[i] = task_3_greens[1]
-        task_3_std[i]= task_3_greens[2]
+        t3_walker = initialise.random_walker(points_t3[i],n_walks_t3)
+        t3_grid = t3_walker[0]
+        t3_std[i]= t3_walker[1]
 
         fig, ax = plt.subplots()
-        imshow = ax.imshow(t_3_grid, cmap="coolwarm")
-        ax.set_title(f"greens function at point {points_t3[i]*grid_size_t3} cm")
-        ax.set_xlabel('x grid_point (cm/spacing)')
-        ax.set_ylabel('y grid_point (cm/spacing)')
+        imshow = ax.imshow(t3_grid, cmap="coolwarm")
+        ax.set_title(f"greens function at point {points_t3[i]/grid_size_t3} cm")
+        ax.set_xlabel('y grid_point (cm/spacing)')
+        ax.set_ylabel('x grid_point (cm/spacing)')
         fig.colorbar(imshow)
 
     print('\nTask 3\n-------\nsee graphs')
+    for j in range(len(points_t3)):
+        print(f'std = {t3_std[j]}')
 
 
 
@@ -412,7 +397,7 @@ if __name__ == "__main__":
     print('\nTask 4\n-------\n')
     #taking the perameters from task 3
     grid_size_t4 = 10e-2 #m
-    h_t4 = 1e-2 # m  or 1e-1 cm
+    h_t4 = 1e-3 # m  or 1e-1 cm
     x0_t4 = 0
     n_walks_t4 = 100
 
@@ -421,28 +406,54 @@ if __name__ == "__main__":
     def function(coords):
         return 0
     print('Laplace grid')
-    # part a
-    boundary_t4 = 1
+    def task_4_bounds(x0_task4):
+        # part a
+        boundary_t4 = 1
+
+        task_4a = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
+        task_4a_greens = task_4a.random_walker(points_t4[0], n_walks_t4)
+        task_4a_solve = task_4a.solve(points_t4[0], n_walks_t4)
+        print(f'a) Phi_ij = {task_4a_solve[1]} +/- {task_4a_solve[2]}')
+
+        #part b
+        boundary_t4 = np.array([1,1,-1,-1])
+
+        task_4b = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
+        task_4b_greens = task_4b.random_walker(points_t4[0], n_walks_t4)
+        task_4b_solve = task_4b.solve(points_t4[0], n_walks_t4)
+        print(f'b) Phi_ij = {task_4b_solve[1]} +/- {task_4b_solve[2]}')
+
+        #part c
+        boundary_t4 = np.array([2,2,1,-4])
+
+        task_4c = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
+        task_4c_greens = task_4c.random_walker(points_t4[0], n_walks_t4)
+        task_4c_solve = task_4c.solve(points_t4[0], n_walks_t4)
+        print(f'c) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]}')
+        #part d
+        boundary_t4 = np.array([2,2,1,-4])
+
+        task_4c = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
+        task_4c_greens = task_4c.random_walker(points_t4[0], n_walks_t4)
+        task_4c_solve = task_4c.solve(points_t4[0], n_walks_t4)
+        print(f'b) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]}')
+
+        return
+
+    def task_4_charge(t4_bounds):
+        print('Poission grid')
+        #part d
+        x0_d = 10 # C
+        task_4d = t4_bounds(x0_d)
+
+        evals = np.linspace(1,0,grid_size_t4) #C
+        x0_e = n
+        task_4e = t4_bounds(x0_e)
 
 
-    task_4 = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
-    task_4_greens = task_4.random_walker(points_t4[0], n_walks_t4)
-    task_4_solve = task_4.solve(points_t4[0], n_walks_t4)
-
-    print(f'a) Phi_ij = {task_4_solve[1]}+/- {task_4_solve[2]}')
-
-    #part b
-    boundary_t4 = 1
-    x0_t4 = 0
-
-    task_4 = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
-    task_4_greens = task_4.random_walker(points_t4[0], n_walks_t4)
-    task_4_solve = task_4.solve(points_t4[0], n_walks_t4)
-
-    print(f'a) Phi_ij = {task_4_solve[1]}+/- {task_4_solve[2]}')
 
 
-    # def task_4():
+    # def task_4(points_array):
 
 
 

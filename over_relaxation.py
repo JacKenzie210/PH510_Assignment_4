@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 class OverRelaxation:
-    
+
     def __init__(self,grid_size, spacing, x0, boundary_values, convergance_tolerence, func):
 
         """
@@ -16,15 +16,15 @@ class OverRelaxation:
         Parameters
         ----------
         grid_size : The size of N to create a NxN grid
-                     
-        spacing : the grid spacing h 
-        
+
+        spacing : the grid spacing h
+
         x0 : Initial conditions of the solution eg. initial charge distribution
              for poission equation.
-        
-        boundary_values : the boundary values 
-        
-        func: the function f(x,y). 
+
+        boundary_values : the boundary values
+
+        func: the function f(x,y).
 
         Returns
         -------
@@ -32,32 +32,33 @@ class OverRelaxation:
         None.
 
         """
-        
+
         self.h = spacing
-        if grid_size % 2 ==0: # this will create an odd sized grid such that a 
-            grid_size += 1    # centre poiont will be present 
-            
+        if grid_size % 2 ==0: # this will create an odd sized grid such that a
+            grid_size += 1    # centre poiont will be present
+
         self.N = int(grid_size // h)
         self.grid_shape = (self.N, self.N)
 
         self.grid = np.empty( self.grid_shape )
-        
+
         self.grid[:] = boundary_values
         self.grid[1:-1, 1:-1] = x0
-        
+
+
         np.where(self.grid ==0, 1e-10*convergance_tolerence, self.grid) # prevents potential divide
                                                   # by 0 error
-        
+
         self.func = func
 
         self.conv_tolerence = convergance_tolerence
 
     def solve(self):
-        
+
         self.phi = self.grid.copy()
-        
+
         omega = 2/(1+np.sin(np.pi/self.N))
-        
+
         #initialises the convergance change and ensures its > tolerance
         convergance_change = self.conv_tolerence + 1
 
@@ -101,7 +102,7 @@ class OverRelaxation:
         return
 
 ###############################################################################
-# Initial Conditions 
+# Initial Conditions
 ###############################################################################
 
 
@@ -127,4 +128,3 @@ b = a.solve()
 
 
 a.plot3d()
-
