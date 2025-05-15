@@ -34,6 +34,9 @@ class OverRelaxation:
         """
         
         self.h = spacing
+        if grid_size % 2 ==0: # this will create an odd sized grid such that a 
+            grid_size += 1    # centre poiont will be present 
+            
         self.N = int(grid_size // h)
         self.grid_shape = (self.N, self.N)
 
@@ -53,9 +56,9 @@ class OverRelaxation:
         
         self.phi = self.grid.copy()
         
-
         omega = 2/(1+np.sin(np.pi/self.N))
         
+        #initialises the convergance change and ensures its > tolerance
         convergance_change = self.conv_tolerence + 1
 
         while convergance_change > self.conv_tolerence:
@@ -70,7 +73,6 @@ class OverRelaxation:
                         + self.phi[xi+1,yj]) ) + ((1-omega)*old_phi[xi,yj])
 
 
-            self.test = np.abs( (old_phi - self.phi)/old_phi )
             convergance_change = np.max( np.abs( (old_phi - self.phi)/old_phi ) )
 
             print(f'''-----------------------------------------------------------
@@ -80,7 +82,7 @@ class OverRelaxation:
         return self.phi
 
     def plot3d(self):
-        
+
         if not hasattr(self, 'self.phi'): #runs the solve function to plot data
             self.solve()                  # if not already done so
 
@@ -104,7 +106,7 @@ class OverRelaxation:
 
 
 grid_size = 10
-boundary_values = 5
+boundary_values = 1
 h = 1/2
 x0 = 3
 
