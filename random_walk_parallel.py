@@ -54,8 +54,13 @@ class GreensFunc:
             self.x_0 = self.grid
             for i in range(len(self.x_0[0])):
                 self.x_0[:,i] = x_0
+
+
         else:
             self.x_0 = x_0
+
+        self.grid[1:-1, 1:-1] = self.x_0
+
         if  np.size(boundary_values) == 4:
 
             self.grid[0] = boundary_values[0]
@@ -63,12 +68,13 @@ class GreensFunc:
             self.grid[-1] = boundary_values[2]
             self.grid[:,-1] = boundary_values[3]
 
+
         else:
             self.grid =self.grid*boundary_values
 
 
 
-        self.grid[1:-1, 1:-1] = self.x_0
+
 
         np.where(self.grid ==0, 1e-12, self.grid) # prevents potential divide
                                                   # by 0 error
@@ -393,36 +399,36 @@ if __name__ == "__main__":
     h_t3 = 1e-3 # m  or 1e-1 cm
     x0_t3 = 1 #using poissons Green functions.
     boundary_t3 = 3
-    n_walks_t3 = 1000
+    n_walks_t3 = 10000
     point_a = (5e-2,5e-2) #cm
     point_b = (2.5e-2,2.5e-2) #cm
     point_c = (0.1e-2, 2.5e-2) #cm
     point_d = (0.1e-2, 0.1e-2) #cm
-
     points_t3 = np.array([point_a,point_b,point_c,point_d])
-    task_3_sol = np.zeros(len(points_t3))
-    t3_std = np.zeros(len(points_t3))
+
+    # task_3_sol = np.zeros(len(points_t3))
+    # t3_std = np.zeros(len(points_t3))
 
 
-    for i in range(len(points_t3)):
-        initialise = GreensFunc(grid_size_t3,h_t3,x0_t3,boundary_t3, test_func)
-        t3_walker = initialise.random_walker(points_t3[i],n_walks_t3)
-        t3_grid = t3_walker[0]
-        t3_std[i]= t3_walker[1]
+    # for i in range(len(points_t3)):
+    #     initialise = GreensFunc(grid_size_t3,h_t3,x0_t3,boundary_t3, test_func)
+    #     t3_walker = initialise.random_walker(points_t3[i],n_walks_t3)
+    #     t3_grid = t3_walker[0]
+    #     t3_std[i]= t3_walker[1]
 
 
-        fig, ax = plt.subplots()
+    #     fig, ax = plt.subplots()
 
-        #full grid and boundaries
-        imshow = ax.imshow(t3_grid, cmap="plasma", vmax = 0.003)
-        ax.set_title(f"greens function at point {points_t3[i]/grid_size_t3} cm")
-        ax.set_xlabel('y grid_point (cm/spacing)')
-        ax.set_ylabel('x grid_point (cm/spacing)')
-        fig.colorbar(imshow)
+    #     #full grid and boundaries
+    #     imshow = ax.imshow(t3_grid, cmap="inferno", vmax = 0.004)
+    #     ax.set_title(f"greens function at point {points_t3[i]/grid_size_t3} cm")
+    #     ax.set_xlabel(f'y grid_point ({grid_size_t3}cm/{h_t3} spacing)')
+    #     ax.set_ylabel(f'x grid_point ({grid_size_t3}cm/{h_t3} spacing)')
+    #     fig.colorbar(imshow)
 
-    print('\nTask 3\n-------\nsee graphs')
-    for j in range(len(points_t3)):
-        print(f'std = {t3_std[j]}')
+    # print('\nTask 3\n-------\nsee graphs')
+    # for j in range(len(points_t3)):
+    #     print(f'std = {t3_std[j]}')
 
 
 
@@ -430,70 +436,93 @@ if __name__ == "__main__":
 # Task 4
 ###############################################################################
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     print('\nTask 4\n-------\n')
-#     #taking the perameters from task 3
-#     grid_size_t4 = 10e-2 #m
-#     h_t4 = 1e-3 # m  or 1e-1 cm
-#     x0_t4 = 0
-#     n_walks_t4 = 100
+    print('\nTask 4\n-------\n')
+    #taking the perameters from task 3
+    grid_size_t4 = 10e-2 #m
+    h_t4 = 1e-3 # m  or 1e-1 cm
+    x0_t4 = 0
+    n_walks_t4 = 1e8
 
-#     prob_walks = np.array([0.25,0.25,0.25,0.25])
-#     points_t4 = points_t3.copy()
-#     def function(coords):
-#         return 0
-#     print('Laplace grid')
-#     def task_4_bounds(x0_task4):
-#         # part a
-#         boundary_t4 = 1
-
-#         task_4a = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
-#         task_4a_greens = task_4a.random_walker(points_t4[0], n_walks_t4)
-#         task_4a_solve = task_4a.solve(points_t4[0], n_walks_t4)
-#         print(f'a) Phi_ij = {task_4a_solve[1]} +/- {task_4a_solve[2]}')
-
-#         #part b
-#         boundary_t4 = np.array([1,1,-1,-1])
-
-#         task_4b = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
-#         task_4b_greens = task_4b.random_walker(points_t4[0], n_walks_t4)
-#         task_4b_solve = task_4b.solve(points_t4[0], n_walks_t4)
-#         print(f'b) Phi_ij = {task_4b_solve[1]} +/- {task_4b_solve[2]}')
-
-#         #part c
-#         boundary_t4 = np.array([2,2,1,-4])
-
-#         task_4c = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
-#         task_4c_greens = task_4c.random_walker(points_t4[0], n_walks_t4)
-#         task_4c_solve = task_4c.solve(points_t4[0], n_walks_t4)
-#         print(f'c) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]}')
-#         #part d
-#         boundary_t4 = np.array([2,2,1,-4])
-
-#         task_4c = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, function)
-#         task_4c_greens = task_4c.random_walker(points_t4[0], n_walks_t4)
-#         task_4c_solve = task_4c.solve(points_t4[0], n_walks_t4)
-#         print(f'b) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]}')
-
-#         return
-
-#     def task_4_charge(t4_bounds):
-#         print('Poission grid')
-#         #part d
-#         x0_d = 10 # C
-#         task_4d = t4_bounds(x0_d)
-
-#         evals = np.linspace(1,0,grid_size_t4) #C
-#         x0_e = n
-#         task_4e = t4_bounds(x0_e)
+    prob_walks = np.array([0.25,0.25,0.25,0.25])
+    points_t4 = points_t3.copy()
+    def charge_func(coords):
+        return 1
+    print('Laplace grid')
 
 
+    def task_4_bounds(x0_task4, i):
+        # part a
+        boundary_t4 = 1
+
+        task_4a = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, charge_func)
+        #task_4a_greens = task_4a.random_walker(points_t4[i], n_walks_t4)
+        task_4a_solve = task_4a.solve(points_t4[i], n_walks_t4)
+        print(f'a) Phi_ij = {task_4a_solve[1]} +/- {task_4a_solve[2]}')
+
+        #part b
+        boundary_t4 = np.array([1,1,-1,-1])
+
+        task_4b = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, charge_func)
+        #task_4b_greens = task_4b.random_walker(points_t4[i], n_walks_t4)
+        task_4b_solve = task_4b.solve(points_t4[i], n_walks_t4)
+        print(f'b) Phi_ij = {task_4b_solve[1]} +/- {task_4b_solve[2]}')
+
+        #part c
+        boundary_t4 = np.array([2,2,1,-4])
+
+        task_4c = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, charge_func)
+        #task_4c_greens = task_4c.random_walker(points_t4[i], n_walks_t4)
+        task_4c_solve = task_4c.solve(points_t4[i], n_walks_t4)
+        print(f'c) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]}')
+        #part d
+        boundary_t4 = np.array([2,2,1,-4])
+
+        task_4c = GreensFunc(grid_size_t4, h_t4, x0_t4, boundary_t4, charge_func)
+        #task_4c_greens = task_4c.random_walker(points_t4[0], n_walks_t4)
+        task_4c_solve = task_4c.solve(points_t4[0], n_walks_t4)
+        print(f'b) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]} \n\n')
+
+        return task_4a_solve,task_4b_solve,task_4c_solve
+
+    print('Poission grid')
+    def task_4_charge(i):
+
+        #part d
+        x0_d = 10 # C
+        task_4d = task_4_bounds(x0_d,i)
+
+        x0_e = np.linspace(1,0, int(grid_size_t4//h_t3)-2) # -2 for interior size
+        x0_e = np.outer(np.linspace(1, 0, int(grid_size_t4//h_t3)-2),
+                        np.ones(int(grid_size_t4//h_t3)-2))
+
+        task_4e = task_4_bounds(x0_e,i)
 
 
-    # def task_4(points_array):
+        x_f = np.linspace(0, grid_size_t4, int(grid_size_t4//h_t3)-2)
+        y_f = np.linspace(0, grid_size_t4, int(grid_size_t4//h_t3)-2)
+
+        X_f,Y_f = np.meshgrid(x_f,y_f)
+
+        r_f  = np.sqrt(X_f**2+Y_f**2)
+        x0_f = np.exp(-2000*r_f)
+
+        task_4f = task_4_bounds(x0_f,i)
 
 
+        return task_4d,task_4e,task_4f
 
-    #     solution = 1
-    #     return solution
+    #solving Task 4 for each of the T3 points
+    solutions_abc_55 = task_4_bounds(x0_t4,0)
+    solutions_def_55 = task_4_charge(0)
+
+    solutions_abc_25 = task_4_bounds(x0_t4,1)
+    solutions_def_25 = task_4_charge(1)
+
+    solutions_abc_0125 = task_4_bounds(x0_t4,2)
+    solutions_def_0125 = task_4_charge(2)
+
+    solutions_abc_0101 = task_4_bounds(x0_t4,3)
+    solutions_def_0101 = task_4_charge(3)
+
