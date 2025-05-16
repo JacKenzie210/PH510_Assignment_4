@@ -50,8 +50,6 @@ class GreensFunc:
         self.bound = boundary_values
 
         self.x_0 = x_0
-
-
         if np.size(self.x_0) == np.size(self.grid): # if x0 is in specified grid
                                                     # distribution
             self.grid[1:-1, 1:-1] = self.x_0[1:-1, 1:-1]

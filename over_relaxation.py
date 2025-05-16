@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 class OverRelaxation:
 
-    def __init__(self,grid_size, spacing, x0, boundary_values, convergance_tolerence, func):
+    def __init__(self,grid_size, spacing, x_0, boundary_values, convergance_tolerence, func):
 
         """
 
@@ -19,7 +19,7 @@ class OverRelaxation:
 
         spacing : the grid spacing h
 
-        x0 : Initial conditions of the solution eg. initial charge distribution
+        x_0 : Initial conditions of the solution eg. initial charge distribution
              for poission equation.
 
         boundary_values : the boundary values
@@ -40,7 +40,9 @@ class OverRelaxation:
         self.N = int(grid_size // h)
         self.grid_shape = (self.N, self.N)
 
-        self.grid = np.empty( self.grid_shape )
+        self.grid = np.ones( self.grid_shape)
+
+
 
         if  np.size(boundary_values) == 4:
 
@@ -49,12 +51,17 @@ class OverRelaxation:
             self.grid[-1] = boundary_values[2]
             self.grid[:,-1] = boundary_values[3]
 
+        else:
+            self.grid * boundary_values
+
+        self.x_0 = x_0
+        if np.size(self.x_0) == np.size(self.grid): # if x_0 is in specified grid
+                                                    # distribution
+            self.grid[1:-1, 1:-1] = self.x_0[1:-1, 1:-1]
 
         else:
-            self.grid =self.grid*boundary_values
+            self.grid[1:-1, 1:-1] = x_0
 
-
-        self.grid[1:-1, 1:-1] = x0
 
 
         np.where(self.grid ==0, 1e-10*convergance_tolerence, self.grid) # prevents potential divide
@@ -118,9 +125,9 @@ class OverRelaxation:
 
 
 grid_size = 10
-boundary_values = 1
+boundary_values = 3
 h = 1/2
-x0 = 3
+x_0 = 1
 
 epsilon = 1e-2
 
@@ -131,7 +138,7 @@ def test_func(x,y):
     return np.sin(x+y)**2
 
 
-a = OverRelaxation(grid_size, h, x0, boundary_values,epsilon,  test_func)
+a = OverRelaxation(grid_size, h, x_0, boundary_values,epsilon,  test_func)
 
 
 
@@ -144,30 +151,31 @@ a.plot3d()
 ###############################################################################
 #Task 5 comparison results
 ###############################################################################
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
 
-    #for 4a
-    boundary_values_a = 1
-    x0abc = 0
+#     #for 4a
+#     boundary_values_a = 1
+#     x_0abc = 0
 
-    sol_a = OverRelaxation(grid_size, h, x0abc, boundary_values,epsilon,  test_func)
+#     sol_a = OverRelaxation(grid_size, h, x_0abc, boundary_values_a,epsilon,  test_func).solve()
 
-    #for 4b
-    boundary_values_b = np.array([1,1,-1,-1])
-    sol_b = OverRelaxation(grid_size, h, x0abc, boundary_values,epsilon,  test_func)
+#     #for 4b
+#     boundary_values_b = np.array([1,1,-1,-1])
+#     sol_b = OverRelaxation(grid_size, h, x_0abc, boundary_values_b,epsilon,  test_func).solve()
 
-    boundary_values_b = np.array([2,0,2,-4])
-    sol_b = OverRelaxation(grid_size, h, x0abc, boundary_values,epsilon,  test_func)
+#     #for 4c
+#     boundary_values_c = np.array([2,0,2,-4])
+#     sol_b = OverRelaxation(grid_size, h, x_0abc, boundary_values_c,epsilon,  test_func).solve()
 
-    #for 4d (aa)
-    boundary_values_a = 1
+#     #for 4d (aa)
+#     boundary_values_a = 1
 
 
-    #for 4e (bb)
-    total_grid = 100 # 10cm width with 0.1 cm spacing
-    x0_e = np.linspace(1,0, total_grid) # -2 for interior size
-    x0_e = np.outer(np.linspace(1, 0, total_grid),
-                    np.ones(total_grid))
+#     #for 4e (bb)
+#     total_grid = 100 # 10cm width with 0.1 cm spacing
+#     x_0_e = np.linspace(1,0, total_grid) # -2 for interior size
+#     x_0_e = np.outer(np.linspace(1, 0, total_grid),
+#                     np.ones(total_grid))
 
-    #for 4f (cc)
+#     #for 4f (cc)
