@@ -50,16 +50,16 @@ class GreensFunc:
         self.bound = boundary_values
 
         self.x_0 = x_0
-        if np.size(self.x_0) > 1 : #if a constant gradient array i.e task 4.bb
-            self.x_0 = self.grid
-            for i in range(len(self.x_0[0])):
-                self.x_0[:,i] = x_0
 
+
+        if np.size(self.x_0) == np.size(self.grid): # if x0 is in specified grid
+                                                    # distribution
+            self.grid[1:-1, 1:-1] = self.x_0[1:-1, 1:-1]
 
         else:
             self.x_0 = x_0
 
-        self.grid[1:-1, 1:-1] = self.x_0
+
 
         if  np.size(boundary_values) == 4:
 
@@ -146,7 +146,7 @@ class GreensFunc:
         #RIGHT = direction_probs[3] * 100
 
 
-        if self.x_0 == 0 : # less computationally demanding to record only the
+        if np.size(self.x_0) == 1 and np.any(self.x_0) ==0 : # less computationally demanding to record only the
                      # boundary values of the walk when considering Laplace.
 
             for _ in range(int(n_walks)):
@@ -295,7 +295,7 @@ class GreensFunc:
             self.std_greens_val = g_grid[1]
 
 
-        if self.x_0 == 0: #Does the Laplace only version seperately for
+        if np.size(self.x_0) == 1 and np.any(self.x_0) ==0 : #Does the Laplace only version seperately for
                           #efficiency
 
             self.phi_grid = self.grid.copy()
@@ -338,31 +338,6 @@ class GreensFunc:
 
 
         return self.phi_grid, self.phi_ij, std_phi
-
-
-    # def plot3d(self,initial_position = None,
-    #            n_walks = None,
-    #            direction_probs = None):
-
-
-    #     if not hasattr(self, 'self.phi_ij'): #runs the solve function to plot data
-    #         self.solve(initial_position,     # if not already done so
-    #                    n_walks,
-    #                    direction_probs)
-
-    #     x = np.linspace(0, self.n_grid_points , self.n_grid_points)
-    #     y = np.linspace(0, self.n_grid_points , self.n_grid_points)
-    #     X, Y = np.meshgrid(x, y)
-
-    #     ax = plt.axes(projection = "3d")
-    #     ax.plot_surface(X, Y, self.phi_ij, cmap="coolwarm")
-    #     plt.title(r"surface of $\phi$")
-    #     plt.xlabel("x value")
-    #     plt.ylabel("y value")
-    #     ax.set_zlabel(r"$\phi$(x,y)")
-    #     plt.show()
-
-    #     return
 
 
 ###############################################################################
@@ -425,29 +400,29 @@ if __name__ == "__main__":
     point_d = (0.1e-2, 0.1e-2) #cm
     points_t3 = np.array([point_a,point_b,point_c,point_d])
 
-    task_3_sol = np.zeros(len(points_t3))
-    t3_std = np.zeros(len(points_t3))
+    # task_3_sol = np.zeros(len(points_t3))
+    # t3_std = np.zeros(len(points_t3))
 
 
-    for i in range(len(points_t3)):
-        initialise = GreensFunc(GRID_SIZE_T3,H_T3,X0_T3,BOUNDARY_T3, test_func)
-        t3_walker = initialise.random_walker(points_t3[i],N_WALKS_T3)
-        t3_grid = t3_walker[0]
-        t3_std[i]= t3_walker[1]
+    # for i in range(len(points_t3)):
+    #     initialise = GreensFunc(GRID_SIZE_T3,H_T3,X0_T3,BOUNDARY_T3, test_func)
+    #     t3_walker = initialise.random_walker(points_t3[i],N_WALKS_T3)
+    #     t3_grid = t3_walker[0]
+    #     t3_std[i]= t3_walker[1]
 
 
-        fig, ax = plt.subplots()
+    #     fig, ax = plt.subplots()
 
-        #full grid and boundaries
-        imshow = ax.imshow(t3_grid, cmap="inferno", vmax = 0.004)
-        ax.set_title(f"greens function at point {points_t3[i]} cm")
-        ax.set_xlabel(f'y grid_point ({GRID_SIZE_T3}cm/{H_T3} spacing)')
-        ax.set_ylabel(f'x grid_point ({GRID_SIZE_T3}cm/{H_T3} spacing)')
-        fig.colorbar(imshow)
+    #     #full grid and boundaries
+    #     imshow = ax.imshow(t3_grid, cmap="inferno", vmax = 0.004)
+    #     ax.set_title(f"greens function at point {points_t3[i]*1e2} cm")
+    #     ax.set_xlabel(f'y grid_point ({GRID_SIZE_T3}cm/{H_T3} spacing)')
+    #     ax.set_ylabel(f'x grid_point ({GRID_SIZE_T3}cm/{H_T3} spacing)')
+    #     fig.colorbar(imshow)
 
-    print('\nTask 3\n-------\nsee graphs')
-    for j in range(len(points_t3)):
-        print(f'std = {t3_std[j]}')
+    # print('\nTask 3\n-------\nsee graphs')
+    # for j in range(len(points_t3)):
+    #     print(f'std = {t3_std[j]}')
 
 
 
@@ -480,13 +455,12 @@ if __name__ == "__main__":
 
         """
         return coords[0]+coords[1]
-    print('Laplace grid')
 
 
     def task_4_bounds(x0_task4, point_i):
 
         """
-        i : number of itteration to select the correct origin point
+        point_i : number of itteration to select the correct origin point
 
         Returns
         -------
@@ -512,19 +486,13 @@ if __name__ == "__main__":
         print(f'b) Phi_ij = {task_4b_solve[1]} +/- {task_4b_solve[2]}')
 
         #part c
-        boundary_t4 = np.array([2,2,1,-4])
+        boundary_t4 = np.array([2,0,2,-4])
 
         task_4c = GreensFunc(GRID_SIZE_T4, H_T4, x0_task4, boundary_t4, charge_func)
         #task_4c_greens = task_4c.random_walker(points_t4[i], N_WALKS_T4)
         task_4c_solve = task_4c.solve(points_t4[point_i], N_WALKS_T4)
         print(f'c) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]}')
         #part d
-        boundary_t4 = np.array([2,2,1,-4])
-
-        task_4c = GreensFunc(GRID_SIZE_T4, H_T4, X0_T4, boundary_t4, charge_func)
-        #task_4c_greens = task_4c.random_walker(points_t4[0], N_WALKS_T4)
-        task_4c_solve = task_4c.solve(points_t4[point_i], N_WALKS_T4)
-        print(f'b) Phi_ij = {task_4c_solve[1]} +/- {task_4c_solve[2]} \n\n')
 
         return task_4a_solve,task_4b_solve,task_4c_solve
 
@@ -543,17 +511,22 @@ if __name__ == "__main__":
 
         #part d
         x0_d = 10 # C
+        print('\ntask d\n------')
         task_4d = task_4_bounds(x0_d,point_i)
 
-        x0_e = np.linspace(1,0, int(GRID_SIZE_T4//H_T3)-2) # -2 for interior size
-        x0_e = np.outer(np.linspace(1, 0, int(GRID_SIZE_T4//H_T3)-2),
-                        np.ones(int(GRID_SIZE_T4//H_T3)-2))
+        #part e
+        print('\ntask e\n------')
+        x0_e = np.linspace(1,0, int(GRID_SIZE_T4//H_T3)) # -2 for interior size
+        x0_e = np.outer(np.linspace(1, 0, int(GRID_SIZE_T4//H_T3)),
+                        np.ones(int(GRID_SIZE_T4//H_T3)))
+
 
         task_4e = task_4_bounds(x0_e,point_i)
 
-
-        x_f = np.linspace(0, GRID_SIZE_T4, int(GRID_SIZE_T4//H_T3)-2)
-        y_f = np.linspace(0, GRID_SIZE_T4, int(GRID_SIZE_T4//H_T3)-2)
+        #part f
+        print('\ntask f\n------')
+        x_f = np.linspace(0, GRID_SIZE_T4, int(GRID_SIZE_T4//H_T3))
+        y_f = np.linspace(0, GRID_SIZE_T4, int(GRID_SIZE_T4//H_T3))
 
         x_grid,y_grid = np.meshgrid(x_f,y_f)
 
@@ -566,17 +539,17 @@ if __name__ == "__main__":
         return task_4d,task_4e,task_4f
 
     #solving Task 4 for each of the T3 points
-    print('point (5,5) cm')
+    print('\npoint (5,5) cm\n--------------------------------------------------')
     solutions_abc_55 = task_4_bounds(X0_T4,0)
     solutions_def_55 = task_4_charge(0)
 
-    print('point (2.5,2.5) cm')
+    print('\npoint (2.5,2.5) cm\n----------------------------------------------')
     solutions_abc_25 = task_4_bounds(X0_T4,1)
     solutions_def_25 = task_4_charge(1)
 
-    print('point (0.1,0.25) cm')
+    print('\npoint (0.1,0.25) cm\n---------------------------------------------')
     solutions_abc_0125 = task_4_bounds(X0_T4,2)
     solutions_def_0125 = task_4_charge(2)
-    print('point (0.1,0.1) cm')
+    print('\npoint (0.1,0.1) cm\n----------------------------------------------')
     solutions_abc_0101 = task_4_bounds(X0_T4,3)
     solutions_def_0101 = task_4_charge(3)
