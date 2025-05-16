@@ -1,0 +1,194 @@
+===================================================================================
+SLURM Job ID:            12072497
+Submit time:             Fri May 16 15:11:06 BST 2025 (Unix Epoch time: 1747404666)
+Start time:              Fri May 16 15:11:07 BST 2025 (Unix Epoch time: 1747404667)
+No. nodes:               1
+No. tasks:               16
+Job name:                assignment_4_series.sh
+Account:                 teaching
+QoS:                     teaching
+Partition (queue):       teaching
+Submit directory:        /users/xdb20131/Year_5/Assignment_4
+Script name:             /users/xdb20131/Year_5/Assignment_4/assignment_4_series.sh
+Master node:             wee10
+Nodes used:              wee10
+Task distribution:       
+===================================================================================
+
+
+Task 4
+-------
+
+
+point (5,5) cm
+--------------------------------------------------
+All 100.0 walks accounted for and normalised
+a) Phi_ij = 1.0 +/- 0.00490963743825282
+All 100.0 walks accounted for and normalised
+b) Phi_ij = -0.22000000000000003 +/- 0.0051629023023157215
+All 100.0 walks accounted for and normalised
+c) Phi_ij = 0.33999999999999997 +/- 0.0051132529862724695
+task d
+------
+All 298937 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0105149772305873 +/- 0.439909699678656
+All 281948 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = -0.15019002369456136 +/- 0.4239028805859058
+All 301391 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 0.21057328716331036 +/- 0.803225208966441
+task e
+------
+All 308104 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0099435064161275 +/- 0.42057818363459154
+All 320205 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = -0.06939889731510995 +/- 0.43911082267270496
+All 319020 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 0.10035668622555417 +/- 0.9229003812144366
+task f
+------
+All 343212 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.010230677315948 +/- 0.3872979363023828
+All 303214 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 0.01024022437787486 +/- 0.4296770175129119
+All 254425 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 0.5098285064171258 +/- 0.8401016747498463
+
+point (2.5,2.5) cm
+----------------------------------------------
+All 100.0 walks accounted for and normalised
+a) Phi_ij = 1.0 +/- 0.006154677081632743
+All 100.0 walks accounted for and normalised
+b) Phi_ij = 0.66 +/- 0.00576959385437844
+All 100.0 walks accounted for and normalised
+c) Phi_ij = 1.61 +/- 0.006438282267080553
+task d
+------
+All 168444 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0107304435736748 +/- 0.3444370025188226
+All 159677 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 0.8701813428320728 +/- 0.3921021887814198
+All 176038 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 1.6710206733623196 +/- 0.8009525086730689
+task e
+------
+All 183189 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0104722102937576 +/- 0.39086151950815
+All 159778 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 0.6903934669549759 +/- 0.4066632912928218
+All 211025 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 1.8695138225572236 +/- 0.8255905756743136
+task f
+------
+All 170205 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0102900242105668 +/- 0.3539633155881316
+All 182024 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 0.5893007636930321 +/- 0.4445351432997915
+All 191554 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 1.5901811000875123 +/- 0.8477428501572545
+
+point (0.1,0.25) cm
+---------------------------------------------
+All 100.0 walks accounted for and normalised
+a) Phi_ij = 1.0 +/- 0.02317023180324077
+All 100.0 walks accounted for and normalised
+b) Phi_ij = 1.0 +/- 0.02317023180324077
+All 100.0 walks accounted for and normalised
+c) Phi_ij = 2.0 +/- 0.019129591591797543
+task d
+------
+All 8964 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0099151501756216 +/- 0.41988919504169636
+All 16732 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 1.009648839648173 +/- 0.41403489434662727
+All 6159 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 2.019134892074777 +/- 0.7498110494507577
+task e
+------
+All 6718 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.010237740708648 +/- 0.39267059201898946
+All 12014 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 1.0102387980838807 +/- 0.3594509729206067
+All 15955 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 2.0198788191754047 +/- 0.8302418059808594
+task f
+------
+All 7590 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0093085469393408 +/- 0.39676516287353014
+All 5535 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 1.0101871532392572 +/- 1.0101877631282124
+All 20237 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 2.010350168422057 +/- 0.9018734759268392
+
+point (0.1,0.1) cm
+----------------------------------------------
+All 100.0 walks accounted for and normalised
+a) Phi_ij = 1.0 +/- 0.02300449044407244
+All 100.0 walks accounted for and normalised
+b) Phi_ij = 1.0 +/- 0.024746107691868285
+All 100.0 walks accounted for and normalised
+c) Phi_ij = 2.0 +/- 0.025756363370258776
+task d
+------
+All 676 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.008771938444368 +/- 0.3999845630248671
+All 1985 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 1.0097277911959368 +/- 0.38170822802242355
+All 1390 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 2.018448305426594 +/- 0.8508539010881019
+task e
+------
+All 1660 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0099661951205081 +/- 0.41643804829409337
+All 2275 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 1.009703200557273 +/- 0.3946768184740223
+All 1205 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 2.0175220336491195 +/- 0.8286360724908377
+task f
+------
+All 1536 steps accounted for and normalised
+All 100 hits accounted for and normalised
+a) Phi_ij = 1.0090510706413656 +/- 0.3930732904701834
+All 776 steps accounted for and normalised
+All 100 hits accounted for and normalised
+b) Phi_ij = 1.0089497448769515 +/- 0.393070234688878
+All 321 steps accounted for and normalised
+All 100 hits accounted for and normalised
+c) Phi_ij = 2.0140267154228533 +/- 0.786025212487921
+===================================================================================
+SLURM job 12072497 ended:     Fri May 16 15:09:26 BST 2025 (Unix Epoch time: 1747404566)
+This is an estimated end time using the 'date' command from node wee10.hpc.strath.ac.uk
+For accurate timings, use 'sacct -j 12072497 -X --format=Submit,Start,End,Elapsed'
+======================================================================================
